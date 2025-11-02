@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduVision AI</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon.png') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    </head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="{{ url_for('homepage') }}" class="logo-link">
+                <img src="{{ url_for('static', filename='images/icon.png') }}" alt="EduVision Logo" class="logo-icon" />
+                <h1>EduVision AI</h1>
+            </a>
+            <p class="tagline">Empowering inclusive design through vision simulation</p>
+        </div>
+    </header>
+
+    <main class="main-content homepage-content">
+        <h2>Why EduVision AI?</h2>
+        <p>
+            EduVision AI was created to help designers, educators, and developers understand how visual content appears to people with different types of color vision deficiencies. 
+            Accessibility is not just a feature — it's a responsibility. By simulating how images look through the lens of protanopia, deuteranopia, and tritanopia, we aim to raise awareness and encourage more inclusive design practices.
+        </p>
+        <p>
+            Whether you're building a website, designing educational materials, or simply curious about visual accessibility, EduVision AI gives you the tools to analyze contrast, dominant colors, and accessibility ratings across multiple vision types.
+        </p>
+
+        <a href="{{ url_for('index') }}" class="btn cta-button btn-primary">
+            <span class="btn-icon">✨</span>
+            Start Image Analysis
+        </a>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 EduVision AI. Rizal National Science High School.</p>
+    </footer>
+</body>
+</html>

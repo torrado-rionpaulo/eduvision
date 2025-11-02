@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduVision AI</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon.png') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+    <svg width="0" height="0" style="position:absolute;">
+        <defs>
+            <filter id="protanopia" color-interpolation-filters="linearRGB">
+                <feColorMatrix type="matrix" values="0.152286 1.052583 -0.204868 0 0 0.114503 0.786281 0.099216 0 0 -0.003882 -0.048116 1.051998 0 0 0 0 0 1 0" />
+            </filter>
+            <filter id="deuteranopia" color-interpolation-filters="linearRGB">
+                <feColorMatrix type="matrix" values="0.367322 0.860646 -0.227968 0 0 0.280085 0.672501 0.047413 0 0 -0.011820 0.042940 0.968881 0 0 0 0 0 1 0" />
+            </filter>
+            <filter id="tritanopia" color-interpolation-filters="linearRGB">
+                <feColorMatrix type="matrix" values="1.255528 -0.076749 -0.178779 0 0 -0.078411 0.930809 0.147602 0 0 0.004733 0.691367 0.303900 0 0 0 0 0 1 0" />
+            </filter>
+        </defs>
+    </svg>
+
+    <header class="header">
+        <div class="header-content">
+            <a href="{{ url_for('homepage') }}" class="logo-link">
+                <img src="{{ url_for('static', filename='images/icon.png') }}" alt="EduVision Logo" class="logo-icon" />
+                <h1>EduVision AI</h1>
+            </a>
+            <p class="tagline">Empowering inclusive design through vision simulation</p>
+        </div>
+    </header>
+
+    <section class="camera-section" id="cameraSection" style="display:none;">
+        <div class="camera-preview">
+            <video id="video" autoplay playsinline></video>
+            <button id="capture" class="btn-capture">📸 Capture</button>
+            <canvas id="canvas" style="display:none;"></canvas>
+        </div>
+    </section>
+
+    <main class="main-content">
+        <div class="container">
+            <section class="normal-vision-section">
+                <h2 class="section-title">NORMAL VISION</h2>
+                <div class="image-card">
+                    <div class="image-box" id="normalVisionBox">No image yet</div>
+                </div>
+
+                <div id="statusMessage" style="text-align: center; margin-bottom: 1rem; color: #3d5467;"></div>
+                
+                <div class="button-group">
+                    <input type="file" accept="image/*" id="uploadPhoto" style="display:none" />
+                    <label for="uploadPhoto" class="btn btn-primary">
+                        <span class="btn-icon">📁</span>
+                        Upload Photo
+                    </label>
+                    <button id="startCamera" class="btn btn-secondary">
+                        <span class="btn-icon">📷</span>
+                        Take Photo
+                    </button>
+                    <button id="runAnalysisButton" class="btn btn-action" style="display: none;">
+                        <span class="btn-icon">✨</span>
+                        Run Analysis
+                    </button>
+                </div>
+            </section>
+
+            <section class="simulated-vision-section">
+                <h2 class="section-title">SIMULATED COLOR VISION</h2>
+                
+                <div class="vision-types-grid">
+                    <div class="vision-card">
+                        <h3 class="vision-title">PROTANOPIA</h3>
+                        <div class="vision-image-wrapper">
+                            <img id="protanopiaImg" alt="Protanopia Filtered" class="vision-image" />
+                        </div>
+                    </div>
+                    
+                    <div class="vision-card">
+                        <h3 class="vision-title">DEUTERANOPIA</h3>
+                        <div class="vision-image-wrapper">
+                            <img id="deuteranopiaImg" alt="Deuteranopia Filtered" class="vision-image" />
+                        </div>
+                    </div>
+                    
+                    <div class="vision-card">
+                        <h3 class="vision-title">TRITANOPIA</h3>
+                        <div class="vision-image-wrapper">
+                            <img id="tritanopiaImg" alt="Tritanopia Filtered" class="vision-image" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-section" id="resultsSection" style="display: none;">
+                    <h2 class="results-title">RESULTS</h2>
+                    
+                    <div class="results-grid">
+                        <div class="result-card" id="normalCard">
+                            <h3 class="result-heading">NORMAL VISION</h3>
+                            <ul></ul>
+                        </div>
+
+                        <div class="result-card" id="protanopiaCard">
+                            <h3 class="result-heading">PROTANOPIA</h3>
+                            <ul></ul>
+                        </div>
+
+                        <div class="result-card" id="deuteranopiaCard">
+                            <h3 class="result-heading">DEUTERANOPIA</h3>
+                            <ul></ul>
+                        </div>
+
+                        <div class="result-card" id="tritanopiaCard">
+                            <h3 class="result-heading">TRITANOPIA</h3>
+                            <ul></ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 EduVision AI. Rizal National Science High School</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
