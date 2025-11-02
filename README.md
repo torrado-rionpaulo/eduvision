@@ -6,4 +6,5 @@ A Python-powered website that uses ResNet50 and K-Means to analyze color-based a
 2. Download required repositories (Numpy, Pillow, Tensorflow, ScikitLearn, ScikitImage)
 3. Create folder "content" within website
 4. Download model weights from [this Google Drive](https://drive.google.com/drive/folders/1cU0Q-3xHQNkrhzEqEQRkAO_m_dmwL6nD?usp=drive_link)
-5. Run app.py
+5. Activate Conda environment
+6. Run app.py
