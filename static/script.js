@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Generate the list content based on the Flask structure
             ul.innerHTML = `
-                <li class="result-verdict ${verdictClass}"><strong>Overall Accessibility Rating:</strong> ${analysis.verdict}</li>
+                <li class="result-verdict ${verdictClass}"><strong>Final Accessibility Rating:</strong> ${analysis.verdict}</li>
                 <li><strong>Overall Accessibility Score:</strong> ${analysis.accessibility_percent}%</li>
                 <li><strong>Technical Accessibility Score:</strong> ${metrics.classification_accuracy}%</li>
                 <li><strong>Identified Segments:</strong> ${metrics.identified_segments.length}/7</li>
