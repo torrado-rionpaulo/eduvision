@@ -91,10 +91,32 @@ def simulate_cvd(pil_img, kind="deutan"):
 # --------------------- RESNET UTILITIES (Unchanged) ---------------------
 # ... (percent_to_label, calibrate_prob, final_accessibility_percent, load_rgb_white_bg_resized, pil_to_base64)
 
-def percent_to_label(pct):
-    if pct >= 50.0: return "Accessible"
-    elif pct >= 20.0: return "Partially accessible"
-    else: return "Not accessible"
+def percent_to_label(pct_resnet, pct_kmeans=None):
+    """
+    Determines accessibility label using the ResNet percentage and optionally
+    the K-Means color-analysis percentage. If both are provided, the label
+    is decided from their average.
+    """
+    try:
+        p_res = float(pct_resnet)
+    except Exception:
+        p_res = 0.0
+
+    if pct_kmeans is not None:
+        try:
+            p_km = float(pct_kmeans)
+        except Exception:
+            p_km = 0.0
+        avg = (p_res + p_km) / 2.0
+    else:
+        avg = p_res
+
+    if avg >= 70.0:
+        return "Accessible"
+    elif avg >= 30.0:
+        return "Partially accessible"
+    else:
+        return "Not accessible"
 
 def calibrate_prob(p, T):
     eps = 1e-6
@@ -225,8 +247,9 @@ def init_model_and_calibration():
     T_ACC = T_ACC_DEFAULT 
     print(f"🌡️ Calibration Temperature (T_ACC) set to: {T_ACC:.3f}")
 
-def predict_access_and_cvd(pil_img):
-    """Runs inference on a PIL image and returns analysis results."""
+def predict_access_and_cvd(pil_img, kmeans_percent=None):
+    """Runs inference on a PIL image and returns analysis results. Optionally
+    takes a K-Means derived percentage to compute a combined label."""
     global model, T_ACC
 
     pil_img_resized = load_rgb_white_bg_resized(pil_img)
@@ -244,21 +267,31 @@ def predict_access_and_cvd(pil_img):
     qual_est = float(pq.ravel()[0])
     
     pct = final_accessibility_percent(raw_p, qual_est, T_ACC)
-    label = percent_to_label(pct)
+    label = percent_to_label(pct, kmeans_percent)
 
     # Format CVD probability distribution
     cvd_probs = {}
     pc_list = pc.ravel().tolist()
     for i, class_name in enumerate(CVD_CLASSES):
         cvd_probs[class_name] = round(pc_list[i], 3)
-    
-    return {
+
+    out = {
         'accessibility_percent': float(f"{pct:.2f}"),
         'verdict': label,
         'cvd_class': cvd_name,
         'cvd_probabilities': cvd_probs,
         'raw_probability': float(f"{raw_p:.3f}"),
     }
+
+    if kmeans_percent is not None:
+        try:
+            kp = float(kmeans_percent)
+            out['kmeans_percent'] = float(f"{kp:.2f}")
+            out['combined_percent'] = float(f"{((pct + kp) / 2.0):.2f}")
+        except Exception:
+            pass
+
+    return out
 
 
 # --------------------- FLASK APPLICATION (UPDATED) ---------------------
@@ -296,15 +329,18 @@ def classify_image_api():
             
             results = {}
             
+            # Compute ground-truth K-Means accuracy for the original image
+            orig_acc = compute_accuracy(classes_orig, classes_orig)
+            
             # 3. Analyze and encode the Normal Image (Combination of ResNet & K-Means Ground Truth)
-            normal_analysis = predict_access_and_cvd(original_pil)
+            normal_analysis = predict_access_and_cvd(original_pil, kmeans_percent=orig_acc)
             
             results['Normal'] = {
                 'analysis': normal_analysis,
                 # K-Means metrics for normal vision (Ground Truth)
                 'color_metrics': {
                     'identified_segments': list(set(classes_orig)), # List unique identified segments
-                    'classification_accuracy': compute_accuracy(classes_orig, classes_orig), 
+                    'classification_accuracy': orig_acc, 
                     'misclassified_segments': [], # None for ground truth
                 },
                 'b64_img': pil_to_base64(original_pil)
@@ -314,19 +350,19 @@ def classify_image_api():
             for kind in SIMULATION_KINDS:
                 # Generate simulation (uses the RGB original_pil)
                 simulated_pil = simulate_cvd(original_pil, kind=kind)
-                
-                # ResNet analysis on simulated image
-                simulated_analysis = predict_access_and_cvd(simulated_pil)
-                
+
                 # K-Means analysis on simulated image
                 kmeans_sim_array = get_kmeans_input_array(simulated_pil)
                 labels_sim, centers_sim, masks_sim = segment_image(kmeans_sim_array)
                 classes_sim = classify_segments_lab(centers_sim, EXPECTED_CLASSES)
-                
+
                 # Compare simulated classification against original ground truth
                 sim_acc = compute_accuracy(classes_sim, classes_orig)
                 misreads = find_misclassifications(classes_sim, masks_sim, classes_orig, masks_orig)
-                
+
+                # ResNet analysis on simulated image (now that sim_acc is available)
+                simulated_analysis = predict_access_and_cvd(simulated_pil, kmeans_percent=sim_acc)
+
                 # Store results and encoded image
                 results[kind.capitalize()] = {
                     'analysis': simulated_analysis,
